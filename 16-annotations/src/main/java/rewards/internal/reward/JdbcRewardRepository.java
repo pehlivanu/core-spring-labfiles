@@ -6,6 +6,10 @@ import rewards.Dining;
 import rewards.RewardConfirmation;
 
 import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import java.sql.*;
 
 /**
@@ -13,14 +17,7 @@ import java.sql.*;
  * records the result of a reward transaction by
  * inserting a reward confirmation record.
  */
-
-/* TODO-04: Let this class to be found in component-scanning
- * - Annotate the class with an appropriate stereotype annotation
- *   to cause component-scanning to detect and load this bean.
- * - Inject dataSource by annotating setDataSource() method
- *   with @Autowired.
- */
-
+@Repository
 public class JdbcRewardRepository implements RewardRepository {
 
 	private DataSource dataSource;
@@ -29,6 +26,7 @@ public class JdbcRewardRepository implements RewardRepository {
 	 * Sets the data source this repository will use to insert rewards.
 	 * @param dataSource the data source
 	 */
+	@Autowired
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
