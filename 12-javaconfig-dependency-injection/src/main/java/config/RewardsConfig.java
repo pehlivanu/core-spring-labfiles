@@ -2,49 +2,92 @@ package config;
 
 import javax.sql.DataSource;
 
-/**
- * TODO-00: In this lab, you are going to exercise the following:
- * - Creating Spring configuration class
- * - Defining bean definitions within the configuration class
- * - Specifying the dependency relationships among beans
- * - Injecting dependencies through constructor injection
- * - Creating Spring application context in the test code
- *   (WITHOUT using Spring testContext framework)
- *
- * TODO-01: Make this class a Spring configuration class
- * - Use an appropriate annotation.
- *
- * TODO-02: Define four empty @Bean methods, one for the
- *          reward-network and three for the repositories.
- * - The names of the beans should be:
- *   - rewardNetwork
- *   - accountRepository
- *   - restaurantRepository
- *   - rewardRepository
- *
- * TODO-03: Inject DataSource through constructor injection
- * - Each repository implementation has a DataSource
- *   property to be set, but the DataSource is defined
- *   elsewhere (TestInfrastructureConfig.java), so you
- *   will need to define a constructor for this class
- *   that accepts a DataSource parameter.
- * - As it is the only constructor, @Autowired is optional.
- *
- * TODO-04: Implement each @Bean method to contain the code
- *          needed to instantiate its object and set its
- *          dependencies
- * - You can create beans from the following implementation classes
- *   - rewardNetwork bean from RewardNetworkImpl class
- *   - accountRepository bean from JdbcAccountRepository class
- *   - restaurantRepository bean from JdbcRestaurantRepository class
- *   - rewardRepository bean from JdbcRewardRepository class
- * - Note that return type of each bean method should be an interface
- *   not an implementation.
- */
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+import rewards.RewardNetwork;
+import rewards.internal.RewardNetworkImpl;
+import rewards.internal.account.AccountRepository;
+import rewards.internal.account.JdbcAccountRepository;
+import rewards.internal.restaurant.JdbcRestaurantRepository;
+import rewards.internal.restaurant.RestaurantRepository;
+import rewards.internal.reward.JdbcRewardRepository;
+import rewards.internal.reward.RewardRepository;
+
+/**
+ * Spring configuration class for the rewards application.
+ * 
+ * This class defines the following beans:
+ * - rewardNetwork: The main service for processing reward transactions
+ * - accountRepository: Repository for accessing account data
+ * - restaurantRepository: Repository for accessing restaurant data
+ * - rewardRepository: Repository for recording reward transactions
+ * 
+ * The DataSource is injected through constructor injection and is used by all repository beans.
+ * All beans are singleton-scoped by default and are eagerly instantiated.
+ */
+@Configuration
 public class RewardsConfig {
 
-	// Set this by adding a constructor.
-	private DataSource dataSource;
+	/**
+	 * The data source used by all repository beans for database access.
+	 * Injected through the constructor.
+	 */
+	private final DataSource dataSource;
+
+	/**
+	 * Creates a new RewardsConfig with the specified data source.
+     *
+     * @param dataSource the data source to be used by repository beans
+     */
+	public RewardsConfig(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	/**
+     * Creates and configures the main reward network service.
+     * 
+     * @return the configured RewardNetwork implementation
+     */
+	@Bean
+	public RewardNetwork rewardNetwork() {
+		return new RewardNetworkImpl(accountRepository(), restaurantRepository(), rewardRepository());
+	}
+
+	/**
+     * Creates and configures the account repository.
+     * 
+     * @return the configured AccountRepository implementation
+     */
+	@Bean
+	public AccountRepository accountRepository() {
+		JdbcAccountRepository accountRepository = new JdbcAccountRepository();
+		accountRepository.setDataSource(dataSource);
+		return accountRepository;
+	}
+
+	/**
+     * Creates and configures the restaurant repository.
+     * 
+     * @return the configured RestaurantRepository implementation
+     */
+	@Bean
+	public RestaurantRepository restaurantRepository() {
+		JdbcRestaurantRepository restaurantRepository = new JdbcRestaurantRepository();
+		restaurantRepository.setDataSource(dataSource);
+		return restaurantRepository;
+	}
+
+	/**
+     * Creates and configures the reward repository.
+     * 
+     * @return the configured RewardRepository implementation
+     */
+	@Bean
+	public RewardRepository rewardRepository() {
+		JdbcRewardRepository rewardRepository = new JdbcRewardRepository();
+		rewardRepository.setDataSource(dataSource);
+		return rewardRepository;
+	}
 
 }
